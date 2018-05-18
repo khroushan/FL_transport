@@ -1,0 +1,5 @@
+# excluding emacs extra files
+*.py~
+
+# data files
+*.dat
