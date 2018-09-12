@@ -6,7 +6,7 @@
 
 import numpy as np
 ############################################################
-def make_sq(mlat, dAB, *J):
+def make_sq(mlat, dAB, J):
     """Constructs the Hamiltonian and the connection 
     matrix of a bipartite square lattice. 
     0--o  0--o    
@@ -15,7 +15,7 @@ def make_sq(mlat, dAB, *J):
     |  |  |  |
     0--o  0--o
     
-    One period of the driven fieldconsists of 5 time
+    One period of the driven field consists of 5 time
     interval which are defined through hoping amplitude Ji
     \in [1,2,..,5], where in the last interval all hopping
     amplitude are off.
@@ -81,7 +81,7 @@ def make_sq(mlat, dAB, *J):
     return h, tau
 
 ############################################################
-def make_Gr(mlat, *J):
+def make_Gr(mlat, J):
     """ Constructs the Hamiltonian and the connection 
     matrix of an armchair graphene strip.
     0--o  0--o
