@@ -139,7 +139,7 @@ for Np in range(-2,3):
     for omega in omRange:
         sumG = 0
 
-        for im in range(-7,8):
+        for im in range(-9,10):
             sumG += scp.jv(im,aL) * g_eff(Ei0-im*omega, omega)[0,2] \
                     * scp.jv(Np-im,aL)
         
