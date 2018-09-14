@@ -65,7 +65,7 @@ data_plot = np.zeros((N_k, NN+1), dtype=float)
 ###      QuasiEnergies      ####
 ################################
 
-Jtup = J* (1,1,1,1)
+Jtup = J*np.ones((4), float)
 # loop over k, first BZ 
 for ik in range(N_k):
 
@@ -73,20 +73,14 @@ for ik in range(N_k):
     # ka = ik*(np.pi/N_k)
     M_eff = np.eye((NN), dtype=complex)   # aux matrix
     for it in range(N_t):
-        if   (it==0 ):
-            Jtup = (delta*J,J,J,J)
-        elif (it==1):
-            Jtup = (J,delta*J,J,J)
-        elif (it==2):
-            Jtup = (J,J,delta*J,J)
-        elif (it==3):
-            Jtup = (J,J,J,delta*J)
-        elif (it==4):
-            Jtup = (0,0,0,0)
+        if   (it==4 ):
+            Jtup = J*np.zeros((4), float)
+        else :
+            Jtup[it] = delta*J
 
 
         # construct the Hamiltonian and hopping matrices
-        h, tau = FL.make_sq(mlat, dAB, *Jtup)
+        h, tau = FL.make_sq(mlat, dAB, Jtup)
         tau_dg = tau.conj().T 
 
         # Construct matrix: [h + tau*exp(ika) + tau^+ * exp(-ika)]
@@ -136,71 +130,46 @@ print(wind_num)
 ###  Transverse Current     ####
 ################################
 
-# T = 1
-# NT = 100                 # time-resolution of one period
-# N_t = 5                  # # of intervals in one period
-# t_intval = T/N_t         # one time interval
+T = 1
+NT = 100                 # time-resolution of each interval
+N_t = 5                  # # of intervals in one period
+t_intval = T/N_t         # one time interval
 
-# tRange = np.linspace(0,T, NT)
-# # we compute the current for a single k-point
-# ka = -np.pi + ik*(2.*np.pi)/(N_k)
+tRange = np.linspace(0,t_intval, NT)
+# we compute the current for a single k-point
+ka = np.pi/4
 
-# Jtup = (delta*J,J,J,J)          # hoping amplitudes tuple
-# for t in tRange:
-#     M_eff = np.eye((NN), dtype=complex)   # aux matrix
-#     for it in range(N_t):
-#         Jtup =
-#             Jtup = (delta*J,J,J,J)
-#         elif (it==1):
-#             Jtup = (J,delta*J,J,J)
-#         elif (it==2):
-#             Jtup = (J,J,delta*J,J)
-#         elif (it==3):
-#             Jtup = (J,J,J,delta*J)
-#         elif (it==4):
-#             Jtup = (0,0,0,0)
+Jtup = J*np.ones((4), float)        # hoping amplitudes tuple
+for it in range(N_t):
+    if   (it==4 ):
+        Jtup = J*np.zeros((4), float)
+    else :
+        Jtup[it] = delta*J
 
-
-#         # construct the Hamiltonian and hopping matrices
-#         h, tau = FL.make_sq(mlat, dAB, *Jtup)
-#         tau_dg = tau.conj().T 
-
-#         # Construct matrix: [h + tau*exp(ika) + tau^+ * exp(-ika)]
-#         # and diagonalization
-#         H_k = h + np.exp(1.j*ka)*tau + np.exp(-1.j*ka)*tau_dg
-
-#         # return eigenenergies and vectors
-#         E_k, U = lg.eig(H_k)    
-
-#         # U^-1 * exp(H_d) U
-#         U_inv = lg.inv(U)
-
-#         # construct a digonal matrix out of a vector
-#         #H_M= np.diag(np.exp((-1j/3.)*E_k*T))
-#         M1 = (np.exp((-1.j)*E_k*T) * U_inv.T).T
-#         #MM = np.dot(U_inv,np.dot(H_M, U))
-#         MM = np.dot(U,M1)
-#         M_eff = np.dot(M_eff,MM)
-
-
-#     E_Fl, UF = lg.eig(M_eff)
-        
-#     E_real = np.log(E_Fl).imag
-#     indx = np.argsort(E_real)
-#     E_sort = E_real[indx]
-#     UF_F = UF[indx[:int(NN/2)]]
-#     UF_inv = UF_F.T.conj()
-#     # print("UF shape is ", UF_F.shape)
-#     # print("UF_inv shape is ", UF_inv.shape)
-#     # print("W_loop shape is ", W_loop.shape)
-#     # Wilson loop winding number calculation
-#     if (ik%2 == 0):
-#         W_loop = np.dot(W_loop, UF_F)
-#     elif (ik%2==1):
-#         W_loop = np.dot(W_loop, UF_inv)
+    # construct the Hamiltonian and hopping matrices
+    # needed for each interval
+    h, tau = FL.make_sq(mlat, dAB, *Jtup)
+    tau_dg = tau.conj().T 
     
-#     data_plot[ik,0] = ka
-#     data_plot[ik,1:] = E_sort/(T)
+    
+    # Construct matrix: [h + tau*exp(ika) + tau^+ * exp(-ika)]
+    H_k = h + np.exp(1.j*ka)*tau + np.exp(-1.j*ka)*tau_dg
+    
+    # one diagonalization for each interval
+    E_k, U = lg.eig(H_k)    
+
+    # U^-1 * exp(H_d) U
+    U_inv = lg.inv(U)
+
+    for t in tRange:
+        M_eff = np.eye((NN), dtype=complex)   # aux matrix
+
+        # construct a digonal matrix out of a vector
+        M1 = (np.exp(-1.j)*E_k*t) * U_inv.T).T
+        MM = np.dot(U,M1)
+        M_eff = np.dot(M_eff,MM)
+
+
 
 ################################
 ###            Plot         ####
